@@ -12,6 +12,7 @@ class Fornecedor {
         this.versao = versao
     }
     async criar () {
+        this.validar()
         const resultado = await tabelafornecedor.inserir({
             empresa: this.empresa,
             email: this.email,
@@ -21,6 +22,51 @@ class Fornecedor {
         this.dataCriacao = resultado.dataCriacao
         this.dataAtualizacao = resultado.dataAtualizacao
         this.versao = resultado.versao
+    }
+
+    async carregar() {
+        const encontrado = await tabelafornecedor.pegarporid(this.id)
+        this.empresa = encontrado.empresa
+        this.email = encontrado.email
+        this.categoria = encontrado.categoria
+        this.dataAtualizacao = encontrado.dataAtualizacao
+        this.dataCriacao = encontrado.dataCriacao
+        this.versao = encontrado.versao
+    }
+    async atualizar(){
+        await tabelafornecedor.pegarporid(this.id)
+        const campos = ['empresa', 'email', 'categoria']
+        const dadosparaatualizar = {}
+        
+        campos.forEach((campo)=>{
+            const valor = this[campo]
+
+            if(typeof valor === 'string' && valor.length > 0){
+                dadosparaatualizar[campo] = valor
+                
+            }
+        })
+
+        if(Object.keys(dadosparaatualizar).length === 0){
+            throw new Error('Nao foram fornecidos dados para atualizar')
+        }
+        await tabelafornecedor.atualizar(this.id, dadosparaatualizar)
+    }
+    async remover(){
+        return tabelafornecedor.remover(this.id)
+    }
+    async validar(){
+        const campos = ['empresa','email','categoria']
+
+        campos.forEach(campo=>{
+            const valor = this[campo]
+
+            if(typeof valor !== 'string' && valor.lenght === 0){
+                throw new Error(`O campo '${campo}' esta invalido`)
+            }
+        })
+
+        
     }
 }
 
